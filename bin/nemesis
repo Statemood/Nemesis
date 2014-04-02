@@ -1,0 +1,17 @@
+#! /bin/bash
+
+# ---------------------------------------------
+# Created by Statemood, 2014-04-02, 17:50
+# Updated by Statemood, 2014-04-02, 18:00
+#            Statemood@gmail.com
+#
+# Project Nemesis:
+#         https://github.com/Statemood/Nemesis
+# ---------------------------------------------
+
+Source="$1"
+
+while read line
+do
+    action
+done
