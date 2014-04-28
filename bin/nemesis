@@ -9,9 +9,46 @@
 #         https://github.com/Statemood/Nemesis
 # ---------------------------------------------
 
-Source="$1"
+READFILE="$1"
+APPSNAME="$(basename $0)"
+LOCKEDIP="/dev/shm/$APPSNAME/Locked.ip"
+RULEFILE="/dev/shm/$APPSNAME/Rules.list"
+LOG_FILE="/data/log/$APPSNAME/$APPSNAME.log"
 
-while read line
+if [ ! -f "$READFILE" ]
+then
+    echo -e "Error: $READFILE: File not found"
+    exit 1
+fi
+
+#. $RULEFILE || exit 1
+tail -f $READFILE | while read line
 do
-    action
+       date=`echo $line | awk '{print $4}' | sed -e 's/T/ /' -e 's/+08:00//'`
+       time=`echo $date | awk '{print $2}'`
+       date=`echo $date | awk '{print $1}'`
+     ipaddr=`echo $line | awk '{print $1}'`
+     status=`echo $line | awk '{print $5}'`
+     method=`echo $line | awk '{print $7}' | sed 's/"//'`
+    request=`echo $line | awk '{print $8}'`
+    referer=`echo $line | awk '{print $10}'`
+    
+    case $status in
+        403|404)
+            color="1;31"
+            ;;
+        *)
+            color="1"
+            ;;
+    esac
+    
+    printf "\033[1m%12s\033[0m : %-32s\n" "Date"     "$date"  
+    printf "\033[1m%12s\033[0m : %-32s\n" "Time"     "$time"
+    printf "\033[1m%12s\033[0m : %-32s\n" "IP"       "$ipaddr"
+    printf "\033[${color}m%12s\033[0m : %-32s\n" "Return Code"   "$status"
+    printf "\033[1m%12s\033[0m : %-32s\n" "Method"   "$method"
+    printf "\033[1m%12s\033[0m : %-32s\n" "Request URL" "$request"
+    printf "\033[1m%12s\033[0m : %-32s\n" "Referer URL" "$referer"
+    
+    echo -e "\n\n"
 done
