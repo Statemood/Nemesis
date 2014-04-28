@@ -2,7 +2,7 @@
 
 # ---------------------------------------------
 # Created by Statemood, 2014-04-02, 17:50
-# Updated by Statemood, 2014-04-02, 18:00
+# Updated by Statemood, 2014-04-04, 10:00
 #            Statemood@gmail.com
 #
 # Project Nemesis:
@@ -14,6 +14,10 @@ APPSNAME="$(basename $0)"
 LOCKEDIP="/dev/shm/$APPSNAME/Locked.ip"
 RULEFILE="/dev/shm/$APPSNAME/Rules.list"
 LOG_FILE="/data/log/$APPSNAME/$APPSNAME.log"
+<<<<<<< HEAD
+=======
+IPTABLES="/sbin/iptables"
+>>>>>>> b3ca88f8be569d60180a4ef1c8618b9cc17b89b6
 
 if [ ! -f "$READFILE" ]
 then
@@ -33,6 +37,7 @@ do
     request=`echo $line | awk '{print $8}'`
     referer=`echo $line | awk '{print $10}'`
     
+<<<<<<< HEAD
     case $status in
         403|404)
             color="1;31"
@@ -51,4 +56,39 @@ do
     printf "\033[1m%12s\033[0m : %-32s\n" "Referer URL" "$referer"
     
     echo -e "\n\n"
+=======
+    # Define rules here:
+    # test ! match && continue
+    
+
+    ipstr="`grep $ipaddr $LOCKEDIP`"
+    if [ "X$ipstr" = "X" ]
+    then
+        $IPTABLES -I INPUT -p tcp -s $ipaddr --dport 80 -j ATTACK
+        echo -e "`date +'%F %T'` IP=$ipaddr\t STATUS=LOCKED\t TIMES=1" >> $LOCKEDIP
+    else
+        locktime=`echo $ipstr | awk '{print $2}'`
+        locktime=`date -d "$locktime" +%H%M%S`
+        lockstat=`echo $ipstr | awk -F 'STATUS=' '{print $2}'`
+        ip_count=`echo $ipstr | awk -F 'Times='  '{print $2}'`
+
+        if   [ "$ip_count" -ge 1 ]
+        then
+            unlockmin=15
+        elif [ "$ip_count" -ge 5 ]
+        then
+            unlockmin=30
+        elif [ "$ip_count" -ge 10 ]
+        then
+            unlockmin=45
+        fi
+               
+        relesetime=`date -d "$unlockmin" +%H%M`
+        if [ "$locktime" -ge "$unlockmin" ]
+        then
+            $IPTABLES -D INPUT -p tcp -s $ipaddr --dport 80 -j ATTACK
+            sed -i "/IP=$ipaddr/d" $LOCKEDIP
+            echo -e "`date +'%F %T'` IP=$ipaddr\t STATUS=RELEASED\t TIMES=$((ip_count++))" >> $LOCKEDIP
+        fi
+    fi
 done
