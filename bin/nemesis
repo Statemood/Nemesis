@@ -2,7 +2,7 @@
 
 # ---------------------------------------------
 # Created by Statemood, 2014-04-02, 17:50
-# Updated by Statemood, 2014-04-10, 18:00
+# Updated by Statemood, 2015-03-23, 17:00
 #            Statemood@gmail.com
 #
 # Project Nemesis:
@@ -82,15 +82,15 @@ do
         ip_count=`echo $str | awk -F 'TIMES='  '{print $2}'`
             ipad=`echo $str | awk -F 'IP=' '{print $2}' | awk '{print $1}'`
 
-        if   [ "$ip_count" -ge 1 ]
+        if   [ "$ip_count" -ge 10 ]
         then
-            unlockmin=15
+            unlockmin=45
         elif [ "$ip_count" -ge 5 ]
         then
             unlockmin=30
-        elif [ "$ip_count" -ge 10 ]
+        elif [ "$ip_count" -ge 1 ]
         then
-            unlockmin=45
+            unlockmin=15
         fi
 
         releasetime=`date -d "$unlockmin minutes ago" +%H%M%S`
